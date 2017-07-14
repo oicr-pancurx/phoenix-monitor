@@ -174,6 +174,7 @@ for my $url (keys %json)
 	if ($json{$url}{sample_type} eq "Identity")
 	{
 		$isCompass = 0;
+		$name = $json{$url}{name};
 		if (exists $json{$url}{attributes})
 		{
 			for (my $j = 0; $j <= $#{ $json{$url}{attributes} }; $j++)
@@ -188,7 +189,7 @@ for my $url (keys %json)
 				elsif ($json{$url}{attributes}[$j]{name} eq "External Name")
 				{
 					$externalName = $json{$url}{attributes}[$j]{value};
-					if ($externalName =~ /COMP/)
+					if (($externalName =~ /COMP/) and ($name =~ /^PCSI/))
 					{
 						$isCompass = 1;
 					}
