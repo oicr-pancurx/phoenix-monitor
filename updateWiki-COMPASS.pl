@@ -189,6 +189,7 @@ for my $url (keys %json)
 				elsif ($json{$url}{attributes}[$j]{name} eq "External Name")
 				{
 					$externalName = $json{$url}{attributes}[$j]{value};
+					$externalName =~ s/,/ /g;
 					if (($externalName =~ /COMP/) and ($name =~ /^PCSI/))
 					{
 						$isCompass = 1;
@@ -209,6 +210,8 @@ for my $url (keys %json)
 					$comp =~ s/.*COMP/COMP/;
 #					$comp =~ s/-/_/;
 					$comp =~ s/ .*//;
+
+
 
 					unless (exists $biopsied{$comp})
 					{
@@ -537,7 +540,14 @@ for $comp (sort keys %summaryData)
 		if ($l = <JSON>)
 		{
 			$jsonHash{j} = decode_json($l);
-			$coverage = ($jsonHash{j}{"aligned bases"} * ($jsonHash{j}{"reads on target"} / $jsonHash{j}{"mapped reads"}) ) / $jsonHash{j}{"target size"};
+			if (($jsonHash{j}{"target size"} > 0) and ($jsonHash{j}{"mapped reads"}))
+			{
+				$coverage = ($jsonHash{j}{"aligned bases"} * ($jsonHash{j}{"reads on target"} / $jsonHash{j}{"mapped reads"}) ) / $jsonHash{j}{"target size"};
+			}
+			else
+			{
+				$coverage = "NA";
+			}
 			$summaryData{$comp}{norm_cov} =  sprintf("%0.1f", $coverage);
 		}
 	}
@@ -763,11 +773,17 @@ for $comp (sort keys %biopsied)
 }
 $page .= "</tbody></table>";
 
+open (CURLFILE, ">fileToCurl.txt") or die "Couldn't open >fileToCurl.txt\n";
+print CURLFILE "{\"id\":\"$wikiID\",\"type\":\"page\",\"title\":\"COMPASS Status\",\"space\":{\"key\":\"PanCuRx\"},\"body\":{\"storage\":{\"value\":\"$page\",\"representation\":\"storage\"}}, \"version\":{\"number\":$pageVersion}}";
+close CURLFILE;
+
 unless ($page eq $oldPage)
 {
-	$jsonPage = decode_json(`curl -K ~/.curlpass -X PUT -H 'Content-Type: application/json' -d'{"id":"$wikiID","type":"page","title":"COMPASS Status","space":{"key":"PanCuRx"},"body":{"storage":{"value":"$page","representation":"storage"}}, "version":{"number":$pageVersion}}' $wikiURL`);
+#	$jsonPage = decode_json(`curl -K ~/.curlpass -X PUT -H 'Content-Type: application/json' -d'{"id":"$wikiID","type":"page","title":"COMPASS Status","space":{"key":"PanCuRx"},"body":{"storage":{"value":"$page","representation":"storage"}}, "version":{"number":$pageVersion}}' $wikiURL`);
+	$jsonPage = decode_json(`curl -K ~/.curlpass -X PUT -H 'Content-Type: application/json' -d @./fileToCurl.txt $wikiURL`);
 
-	print "curl -K ~/.curlpass -X PUT -H 'Content-Type: application/json' -d'{\"id\":\"$wikiID\",\"type\":\"page\",\"title\":\"COMPASS Status\",\"space\":{\"key\":\"PanCuRx\"},\"body\":{\"storage\":{\"value\":\"$page\",\"representation\":\"storage\"}}, \"version\":{\"number\":$pageVersion}}' $wikiURL";
+#	print "curl -K ~/.curlpass -X PUT -H 'Content-Type: application/json' -d'{\"id\":\"$wikiID\",\"type\":\"page\",\"title\":\"COMPASS Status\",\"space\":{\"key\":\"PanCuRx\"},\"body\":{\"storage\":{\"value\":\"$page\",\"representation\":\"storage\"}}, \"version\":{\"number\":$pageVersion}}' $wikiURL";
+	print "curl -K ~/.curlpass -X PUT -H 'Content-Type: application/json' -d @./fileToCurl.txt $wikiURL";
 
 	open (OLD, ">updateWiki-COMPASS.oldPage") or die "Couldn't open updateWiki-COMPASS.oldPage\n";
 	print OLD "$page\n";
@@ -936,6 +952,7 @@ sub processTissue
 
 	my $donor = $name;
 	my $external = $dataRef->{$name}{external_name};
+	$external =~ s/,/ /g;
 	my $samp = $leafName;
 	$samp =~ s/^(...._...._.._.).*$/$1/;
 	my $rec_date = $dataRef->{$name}{$type}{$leafName}{date};

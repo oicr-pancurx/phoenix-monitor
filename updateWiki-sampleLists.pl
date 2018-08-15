@@ -16,7 +16,7 @@ if (exists $ARGV[0])
 }
 
 my $prefix = "/.mounts/labs/PCSI/analysis/";
-my @pages = qw/xmp resected pimo ramp eus sheba compass unicorns qcmg unassigned all/;
+my @pages = qw/btc mcgill metachronous xmp resected pimo ramp eus sheba compass unicorns qcmg unassigned all/;
 
 my $wikiURL = "https://wiki.oicr.on.ca/rest/api/content";
 my %wikiIDs = (
@@ -30,7 +30,10 @@ my %wikiIDs = (
 	"unicorns" => 69050248,
 	"unassigned" => 69049996,
 	"qcmg" => 76092899,
-	"all" => 69049998
+	"all" => 69049998,
+	"mcgill" => 87098307,
+	"metachronous" => 87098304,
+	"btc" => 87100688,
 );
 
 
@@ -42,8 +45,11 @@ my %path = (
 	"sheba" => "sheba",
 	"xmp" => "xmp",
 	"compass" => "compass",
+	"metachronous" => "metachronous",
+	"mcgill" => "mcgill",
 	"unicorns" => "unicorns",
 	"qcmg" => "qcmg",
+	"btc" => "btc",
 	"unassigned" => "oicr",
 	"all" => "oicr"
 );
@@ -60,7 +66,10 @@ my %pageTitle = (
 	"unicorns" => "Unicorn Sample List",
 	"qcmg" => "QCMG Sample List",
 	"unassigned" => "Unassigned Sample List",
-	"all" => "All Sample List"
+	"all" => "All Sample List",
+	"metachronous" => "Metachronous Sample List",
+	"mcgill" => "McGill Sample List",
+	"btc" => "BTC Sample List",
 );
 
 
@@ -309,11 +318,15 @@ sub doCellTweaks
 
 	if ($sampType eq "qcmg")
 	{
-		$data->{tumour} = "<td><a href=\\\"https://www.hpc.oicr.on.ca/archive/projects/PCSI/analysis/qcmg/$data->{donor}/$data->{tumour}/wgs/bwa/0.6.2/results/$data->{tumour}_summary.html\\\">$data->{tumour}</a></td>";
+		$data->{tumour} = "<td><a href=\\\"https://www.hpc.oicr.on.ca/archive/projects/PCSI/analysis/qcmg/$data->{donor}/$data->{tumour}/wgs/bwa/0.6.2/results/$data->{tumour}_landing.html\\\">$data->{tumour}</a></td>";
+	}
+	elsif ($sampType eq "btc")
+	{
+		$data->{tumour} = "<td><a href=\\\"https://www.hpc.oicr.on.ca/archive/projects/PCSI/analysis/btc/$data->{donor}/$data->{tumour}/wgs/bwa/0.6.2/results/$data->{tumour}_landing.html\\\">$data->{tumour}</a></td>";
 	}
 	else
 	{
-		$data->{tumour} = "<td><a href=\\\"https://www.hpc.oicr.on.ca/archive/projects/PCSI/analysis/oicr/$data->{donor}/$data->{tumour}/wgs/bwa/0.6.2/results/$data->{tumour}_summary.html\\\">$data->{tumour}</a></td>";
+		$data->{tumour} = "<td><a href=\\\"https://www.hpc.oicr.on.ca/archive/projects/PCSI/analysis/oicr/$data->{donor}/$data->{tumour}/wgs/bwa/0.6.2/results/$data->{tumour}_landing.html\\\">$data->{tumour}</a></td>";
 	}
 
 	for my $type (qw/donor external_id normal ssm_count sv_count ploidy result_date/)
